@@ -1,11 +1,44 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import { Inter } from 'next/font/google'
+import { useRef, useState } from "react";
 import styles from '@/styles/Home.module.css'
+import axios from 'axios';
 
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
+  const [Description, setDescription] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [Result, setResult] = useState('');
+  const handleDescriptionChange = (event: any) => {
+    setDescription(event.target.value);
+  };
+  const generateResult = async (e: any) => {
+    e.preventDefault();
+    setLoading(true);
+    const dataInp = {
+      prompt: Description,
+    };
+    axios.post('/api/generate', dataInp)
+    .then(response => {
+      const dresponse = response.data;
+     
+      setResult(dresponse.outputText);
+      setLoading(false);
+    })
+    .catch(error => {
+      if (error.response) {
+        console.log(error.response.status);
+        console.log(error.response.data);
+      } else {
+        console.log(error.message);
+      }
+      setLoading(false);
+    });
+
+  
+  }
   return (
     <>
       <Head>
@@ -15,30 +48,43 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
+        <div className='container mx-auto bg-white rounded-md'>
+          <div className='flex flex-col items-center justify-center p-4 space-y-4 w-full'>
+          <div className='w-full'>
+            <label htmlFor="storyDescription" className="block text-sm font-medium leading-6 text-gray-900">
+              What do you want to tweet
+            </label>
+            <div className=" w-full">
+              <textarea
+                id="storyDescription"
+                name="storyDescription"
+                value={Description}
+                onChange={handleDescriptionChange}
 
+
+                required
+                className="block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              />
+            </div>
+          </div>
+
+          <button
+            type="button" onClick={generateResult}
+            className="rounded-md ml-auto bg-indigo-700 py-1.5 px-2.5 mt-4 font-semibold  text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+          >
+            
+                <span>Generate</span>
+            
+
+          </button>
+
+          </div>
+          <div className='min-w-[400px] bg-white rounded-md'>
+{Result}
+          </div>
+
+        </div>
+     
         <div className={styles.center}>
           <Image
             className={styles.logo}
